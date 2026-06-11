@@ -1,32 +1,150 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloudtype - Flask</title>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.3/dist/full.css" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet" type="text/css" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <meta charset="UTF-8">
+    <title>증상 기반 약물 검색</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        input {
+            width: 400px;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            background-color: #f8f8f8;
+        }
+
+        .title {
+            margin-bottom: 10px;
+        }
+
+        .summary {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .image-area {
+            flex-shrink: 0;
+        }
+
+        .image-area img {
+            width: 160px;
+            border-radius: 8px;
+        }
+
+        .info-area {
+            flex: 1;
+        }
+
+        .detail {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 🔻 삼각형 버튼 */
+        .arrow {
+            text-align: center;
+            font-size: 26px;
+            margin-top: 12px;
+            color: #555;
+            user-select: none;
+        }
+    </style>
 </head>
+
 <body>
-<div class="hero min-h-screen bg-base-200">
-  <div class="hero-content flex-col lg:flex-row-reverse">
-    <img src="{{ url_for('static', filename='img/flask.webp') }}" class="w-36 rounded-lg md:ml-5 lg:ml-5"  alt="flask"/>
-    <div>
-      <h1 class="text-5xl font-bold">Flask</h1>
-      <p class="py-6">클라우드타입에서 배포한 Flask 어플리케이션입니다.</p>
-      <button type="button" onclick="window.open('https://github.com/cloudtype-examples/java-springboot')" class="btn btn-outline rounded">
-        GitHub
-      </button>
-      <button type="button" onclick="window.open('https://docs.cloudtype.io/')" class="btn btn-outline rounded">
-        Docs
-      </button>
-      <button type="button" onclick="window.open('https://discord.gg/U7HX4BA6hu')" class="btn btn-outline rounded">
-        Discord
-      </button>
+
+<h1>증상 기반 약물 검색</h1>
+
+<form method="POST">
+    <input
+        type="text"
+        name="keyword"
+        placeholder="예: 두통, 감기, 복통"
+        required
+    >
+    <button type="submit">검색</button>
+</form>
+
+{% for drug in drugs %}
+<div class="card" onclick="toggleDetail(this)">
+
+    <h2 class="title">{{ drug.itemName }}</h2>
+
+    <div class="summary">
+
+        {% if drug.itemImage %}
+        <div class="image-area">
+            <img src="{{ drug.itemImage }}" alt="약 이미지">
+        </div>
+        {% endif %}
+
+        <div class="info-area">
+            <p><strong>제조사:</strong> {{ drug.entpName }}</p>
+
+            <p>
+                <strong>효능:</strong><br>
+                {{ drug.efcyQesitm }}
+            </p>
+        </div>
+
     </div>
-  </div>
+
+    <div class="detail">
+
+        <p><strong>사용법:</strong><br>{{ drug.useMethodQesitm }}</p>
+        <p><strong>주의사항 경고:</strong><br>{{ drug.atpnWarnQesitm }}</p>
+        <p><strong>주의사항:</strong><br>{{ drug.atpnQesitm }}</p>
+        <p><strong>상호작용:</strong><br>{{ drug.intrcQesitm }}</p>
+        <p><strong>부작용:</strong><br>{{ drug.seQesitm }}</p>
+        <p><strong>보관방법:</strong><br>{{ drug.depositMethodQesitm }}</p>
+
+    </div>
+
+    <!-- 🔻 하단 중앙 삼각형 -->
+    <div class="arrow">▼</div>
+
 </div>
+{% endfor %}
+
+<script>
+function toggleDetail(card) {
+
+    const detail = card.querySelector(".detail");
+    const arrow = card.querySelector(".arrow");
+
+    if (detail.style.display === "block") {
+        detail.style.display = "none";
+        arrow.textContent = "▼";
+    } else {
+        detail.style.display = "block";
+        arrow.textContent = "▲";
+    }
+}
+</script>
+
 </body>
 </html>
