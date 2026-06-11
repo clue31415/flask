@@ -79,7 +79,7 @@ def index():
     return render_template(
         "index.html",
         drugs=drugs,
-        keyword=keyword
+        keyword=keyword,
         totalCount=totalCount
     )
 
