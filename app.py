@@ -23,6 +23,8 @@ def symptom():
             "symptoms": results
         })
 
+        print(user_input,results)
+
     return render_template("symptom.html")
 
 @app.route("/drug", methods=["GET", "POST"])
