@@ -413,7 +413,7 @@ symptom_db = {
     }
 }
 
-def predict_symptoms(user_input: str, top_k: int = 5):
+def predict_symptoms(user_input: str, top_k: int = 10):
     text = normalize(user_input)
 
     scores = defaultdict(int)
