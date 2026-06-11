@@ -6,7 +6,7 @@ PyAutoGUI==0.9.54
 PyGetWindow==0.0.9
 PyMsgBox==2.0.1
 pynput==1.8.1
-pyobjc-core==12.1
+pyobjc-core==11.1
 pyobjc-framework-ApplicationServices==11.1
 pyobjc-framework-Cocoa==11.1
 pyobjc-framework-CoreText==11.1
