@@ -17,8 +17,6 @@ def symptom():
         user_input = request.json.get("text", "")
 
         results = predict_symptoms(user_input)
-
-        print(user_input,results)
         
         return jsonify({
             "success": True,
