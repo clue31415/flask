@@ -18,12 +18,12 @@ def symptom():
 
         results = predict_symptoms(user_input)
 
+        print(user_input,results)
+        
         return jsonify({
             "success": True,
             "symptoms": results
         })
-
-        print(user_input,results)
 
     return render_template("symptom.html")
 
