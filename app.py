@@ -11,6 +11,11 @@ SERVICE_KEY = os.getenv("SERVICEKEY_ENV")
 API_URL = "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"
 
 
+@app.route("/", methods=["GET", "POST"])
+def home():
+    return render_template("home.html")
+
+
 @app.route("/symptom", methods=["GET", "POST"])
 def symptom():
     if request.method == "POST":
