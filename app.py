@@ -69,6 +69,9 @@ def index():
                 data.get("body", {})
                     .get("items", [])
             )
+            
+            body = data.get("body", {})
+            totalCount = body.get("totalCount")
 
         except Exception as e:
             print("에러:", e)
@@ -77,6 +80,7 @@ def index():
         "index.html",
         drugs=drugs,
         keyword=keyword
+        totalCount=totalCount
     )
 
 
