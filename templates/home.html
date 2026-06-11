@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>의약 검색 시스템</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Apple SD Gothic Neo", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            width: 700px;
+        }
+
+        h1 {
+            font-size: 34px;
+            margin-bottom: 10px;
+            color: #111827;
+        }
+
+        .sub {
+            color: #6b7280;
+            margin-bottom: 40px;
+        }
+
+        .card-wrap {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            flex: 1;
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .desc {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .symptom {
+            border-top: 5px solid #4a90e2;
+        }
+
+        .drug {
+            border-top: 5px solid #22c55e;
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>💊 의약 검색 시스템</h1>
+    <div class="sub">증상 검색 또는 직접 약물 검색을 선택하세요</div>
+
+    <div class="card-wrap">
+
+        <!-- 증상 검색 -->
+        <div class="card symptom" onclick="location.href='/symptom'">
+            <div class="icon">🩺</div>
+            <div class="title">증상 검색</div>
+            <div class="desc">
+                입력한 증상을 분석하여<br>
+                관련 증상을 제공합니다
+            </div>
+        </div>
+
+        <!-- 약 검색 -->
+        <div class="card drug" onclick="location.href='/drug'">
+            <div class="icon">💊</div>
+            <div class="title">약 검색</div>
+            <div class="desc">
+                직접 키워드로 약물을 검색하고<br>
+                상세 정보를 확인합니다
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Medical Search UI v1.0
+    </div>
+
+</div>
+
+</body>
+</html>
