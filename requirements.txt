@@ -11,6 +11,6 @@ PyRect==0.2.0
 PyScreeze==1.0.1
 pytweening==1.2.0
 requests==2.31.0
-rubicon-objc==0.5.4
+rubicon-objc==0.5.2
 six==1.17.0
 urllib3==2.7.0
