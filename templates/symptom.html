@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>증상 검색</title>
+</head>
+<body>
+
+<h2>증상을 입력하세요</h2>
+
+<input type="text" id="inputText">
+<button onclick="searchSymptom()">검색</button>
+
+<div id="result"></div>
+
+<script>
+async function searchSymptom() {
+
+    const text = document.getElementById("inputText").value;
+
+    const response = await fetch("/symptom", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            text: text
+        })
+    });
+
+    const data = await response.json();
+
+    let html = "";
+
+    data.symptoms.forEach(item => {
+
+        html += `
+            <button
+                onclick="goDrug('${item.의심증상}')"
+                style="display:block;margin:10px;"
+            >
+                ${item.의심증상}
+                (점수:${item.점수})
+            </button>
+        `;
+    });
+
+    document.getElementById("result").innerHTML = html;
+}
+
+function goDrug(symptom) {
+
+    location.href =
+        "/drug?symptom=" +
+        encodeURIComponent(symptom);
+}
+</script>
+
+</body>
+</html>
