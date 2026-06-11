@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+import re
+from collections import defaultdict
 import requests
 import os
 
@@ -9,45 +11,320 @@ SERVICE_KEY = os.getenv("SERVICEKEY_ENV")
 API_URL = "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"
 
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    drugs = []
-
+@app.route("/symptom", methods=["GET", "POST"])
+def symptom():
     if request.method == "POST":
-        keyword = request.form.get("keyword")
+        user_input = request.json.get("text", "")
 
-        params ={'serviceKey' : SERVICE_KEY,
-         'pageNo' : '1',
-         'numOfRows' : '5',
-         'entpName' : '',
-         'itemName' : '',
-         'itemSeq' : '',
-         'efcyQesitm' : keyword,
-         'useMethodQesitm' : '',
-         'atpnWarnQesitm' : '',
-         'atpnQesitm' : '',
-         'intrcQesitm' : '',
-         'seQesitm' : '',
-         'depositMethodQesitm' : '',
-         'openDe' : '',
-         'updateDe' : '',
-         'type' : 'json' }
+        results = predict_symptoms(user_input)
+
+        return jsonify({
+            "success": True,
+            "symptoms": results
+        })
+
+    return render_template("symptom.html")
+
+@app.route("/drug", methods=["GET", "POST"])
+def index():
+
+    drugs = []
+    keyword = ""
+
+    # symptom 페이지에서 넘어온 경우
+    if request.method == "GET":
+        keyword = request.args.get("symptom", "")
+
+    # drug 페이지에서 직접 검색한 경우
+    elif request.method == "POST":
+        keyword = request.form.get("keyword", "")
+
+    # 검색어가 있으면 API 호출
+    if keyword:
+
+        params = {
+            'serviceKey': SERVICE_KEY,
+            'pageNo': '1',
+            'numOfRows': '5',
+            'entpName': '',
+            'itemName': '',
+            'itemSeq': '',
+            'efcyQesitm': keyword,
+            'useMethodQesitm': '',
+            'atpnWarnQesitm': '',
+            'atpnQesitm': '',
+            'intrcQesitm': '',
+            'seQesitm': '',
+            'depositMethodQesitm': '',
+            'openDe': '',
+            'updateDe': '',
+            'type': 'json'
+        }
 
         try:
             response = requests.get(API_URL, params=params)
             data = response.json()
 
-            items = (
+            drugs = (
                 data.get("body", {})
                     .get("items", [])
             )
 
-            drugs = items
-
         except Exception as e:
             print("에러:", e)
 
-    return render_template("index.html", drugs=drugs)
+    return render_template(
+        "index.html",
+        drugs=drugs,
+        keyword=keyword
+    )
+
+
+
+
+# 1. 입력 정규화 함수 (공백/특수문자 제거)
+def normalize(text: str) -> str:
+    return re.sub(r"[^가-힣a-zA-Z0-9]", "", text)
+
+# 2. symptom DB (이전에 만든 구조 그대로 사용)
+symptom_db = {
+
+    "통증": {
+        "index": [
+            "통증", "아픔", "쑤심", "결림", "뻐근", "찌릿", "욱신",
+            "화끈", "압통", "저림", "아프다"
+        ],
+        "items": [
+            ["흉통", "가슴통증", "가슴아픔", "가슴쑤심", "가슴찌릿"],
+            ["요통", "허리통증", "허리아픔", "허리쑤심", "허리뻐근"],
+            ["경부통", "목통증", "목아픔", "목결림", "목뻣뻣"],
+            ["견통", "어깨통증", "어깨아픔", "어깨결림", "어깨뻐근"],
+            ["골반통", "골반통증", "골반아픔", "엉덩이통증"],
+            ["사지통", "팔통증", "다리통증", "팔다리아픔", "팔다리쑤심"],
+            ["신경통", "찌릿", "전기오듯"],
+            ["압통", "누르면아픔", "만지면아픔"],
+            ["작열감", "화끈", "타는듯"],
+            ["방사통", "통증퍼짐", "아픔퍼짐"]
+        ]
+    },
+
+
+    "호흡기": {
+        "index": [
+            "기침", "가래", "숨", "호흡", "쌕쌕", "천명",
+            "목쉼", "쉰목소리", "인후통", "목아픔",
+            "코막힘", "콧물", "재채기",
+            "숨참", "숨막힘", "숨쉬기힘듦", "답답"
+        ],
+        "items": [
+            ["객혈", "피토", "피가래", "가래피"],
+            ["호흡곤란", "숨참", "숨막힘"],
+            ["천명", "쌕쌕", "숨소리"],
+            ["흉부압박", "가슴눌림", "가슴조임"],
+            ["가슴답답", "답답"],
+            ["잦은기침", "계속기침", "기침많음"],
+            ["마른기침", "헛기침", "가래없는기침"],
+            ["야간기침", "밤기침", "잘때기침"],
+            ["목쉼", "목소리쉼", "쉰목소리"],
+            ["호흡시통증", "숨쉴때아픔", "숨들이마실때아픔"]
+        ]
+    },
+
+
+    "소화기": {
+        "index": [
+            "배", "복부", "위", "장", "속",
+            "소화", "구토", "토", "설사",
+            "변비", "메스꺼움", "신물",
+            "속쓰림", "복통", "혈변", "흑변"
+        ],
+        "items": [
+            ["복부팽만", "배더부룩", "배빵빵"],
+            ["소화불량", "소화안됨", "체함"],
+            ["복부불편", "배불편", "배거북"],
+            ["속쓰림", "명치쓰림"],
+            ["신물올라옴", "신물", "위산역류"],
+            ["식욕부진", "입맛없음", "밥맛없음"],
+            ["조기포만", "조금먹어도배부름", "금방배부름"],
+            ["혈변", "변에피", "피똥"],
+            ["흑색변", "검은변", "까만변"],
+            ["삼킴곤란", "삼키기힘듦", "목에걸림"],
+            ["구토", "토", "울렁거림"],
+            ["설사", "묽은변", "물설사"],
+            ["변비", "대변안나옴"]
+        ]
+    },
+
+
+    "신경계": {
+        "index": [
+            "머리", "두통", "어지러움", "어지럼",
+            "기절", "실신", "마비", "저림",
+            "떨림", "경련", "기억", "의식",
+            "말", "발음", "균형", "시야"
+        ],
+        "items": [
+            ["두통", "머리아픔", "머리통증"],
+            ["어지러움", "어지럼"],
+            ["실신", "기절", "정신잃음"],
+            ["의식저하", "멍", "정신흐림"],
+            ["기억력저하", "기억안남", "잘까먹음"],
+            ["감각이상", "감각둔", "저림"],
+            ["마비", "움직임불가", "힘안들어감"],
+            ["떨림", "손떨림", "몸떨림"],
+            ["보행장애", "걷기힘듦", "비틀거림"],
+            ["균형감상실", "휘청", "균형못잡음"],
+            ["경련", "몸경련", "근육경련"],
+            ["언어장애", "말안나옴", "발음꼬임"]
+        ]
+    },
+
+
+    "근골격계": {
+        "index": [
+            "관절", "근육", "뼈", "팔", "다리",
+            "무릎", "발목", "손목", "어깨",
+            "허리", "목", "근력", "붓기"
+        ],
+        "items": [
+            ["관절통", "관절아픔", "무릎통증", "손목통증"],
+            ["관절강직", "관절뻣뻣", "관절안움직임"],
+            ["근육통", "근육아픔", "몸살"],
+            ["근력저하", "힘없음"],
+            ["부종", "붓기", "몸붓기", "다리붓기"],
+            ["운동범위감소", "팔안올라감", "관절안움직임"]
+        ]
+    },
+
+
+    "비뇨기": {
+        "index": [
+            "소변", "오줌", "배뇨", "방광",
+            "빈뇨", "혈뇨", "잔뇨", "요도"
+        ],
+        "items": [
+            ["빈뇨", "소변자주봄", "화장실자주감"],
+            ["배뇨통", "소변볼때아픔", "소변볼때따가움"],
+            ["혈뇨", "소변에피", "붉은소변"],
+            ["잔뇨감", "소변덜본느낌", "시원하지않음"]
+        ]
+    },
+
+
+    "전신증상": {
+        "index": [
+            "열", "발열", "오한", "몸살",
+            "피로", "피곤", "권태", "무기력",
+            "땀", "식은땀", "체중", "불면",
+            "불안", "두근거림"
+        ],
+        "items": [
+            ["탈수", "입마름", "갈증"],
+            ["체중감소", "살빠짐", "몸무게감소"],
+            ["체중증가", "살찜", "몸무게증가"],
+            ["발한", "땀많이남", "식은땀"],
+            ["야간발한", "밤땀"],
+            ["피로감", "피곤"],
+            ["권태감", "나른", "의욕없음"],
+            ["불면", "잠안옴"],
+            ["불안감", "불안", "초조"],
+            ["심계항진", "심장두근거림", "가슴콩닥거림"]
+        ]
+    },
+
+
+    "피부": {
+        "index": [
+            "피부", "가려움", "간지러움",
+            "발진", "두드러기", "반점",
+            "물집", "각질", "상처"
+        ],
+        "items": [
+            ["발진", "피부발진", "붉은반점"],
+            ["소양감", "가려움"],
+            ["창백", "혈색없음"],
+            ["황달", "피부노래짐", "눈노래짐"]
+        ]
+    },
+
+
+    "안과": {
+        "index": [
+            "눈", "시야", "시력", "충혈",
+            "눈곱", "침침", "흐림",
+            "눈물", "가려움"
+        ],
+        "items": [
+            ["시야흐림", "눈침침", "앞이흐림"],
+            ["복시", "두개로보임"],
+            ["충혈", "눈빨개짐", "눈핏발"],
+            ["결막염", "눈가려움", "눈곱"]
+        ]
+    },
+
+
+    "이비인후과": {
+        "index": [
+            "귀", "코", "목", "이명",
+            "난청", "청력", "콧물",
+            "코막힘", "재채기", "인후통"
+        ],
+        "items": [
+            ["이명", "귀울림"],
+            ["난청", "잘안들림", "귀먹먹"]
+        ]
+    }
+}
+
+def predict_symptoms(user_input: str, top_k: int = 5):
+    text = normalize(user_input)
+
+    scores = defaultdict(int)
+    evidence = {}
+
+    # 1️⃣ 계통 순회
+    for system, data in symptom_db.items():
+
+        index_keywords = data["index"]
+        items = data["items"]
+
+        # 2️⃣ 계통 매칭 (index 기반)
+        system_match = any(
+            normalize(k) in text for k in index_keywords
+        )
+
+        # 계통이 전혀 안 맞으면 스킵
+        if not system_match:
+            continue
+
+        # 3️⃣ 실제 증상 매칭
+        for group in items:
+            for keyword in group:
+                nk = normalize(keyword)
+
+                if nk and nk in text:
+                    key = (system, group[0])
+                    scores[key] += 1
+                    evidence[key] = keyword
+
+    # 4️⃣ 정렬
+    sorted_results = sorted(
+        scores.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    # 5️⃣ 결과 출력
+    output = []
+    for (system, symptom), score in sorted_results[:top_k]:
+        output.append({
+            "계통": system,
+            "의심증상": symptom,
+            "근거": evidence[(system, symptom)],
+            "점수": score
+        })
+
+    return output
 
 
 if __name__ == "__main__":
