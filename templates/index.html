@@ -6,224 +6,294 @@
 
     <style>
         body {
-            font-family: Arial;
-            max-width: 1200px;
-            margin: 30px auto;
+            font-family: "Apple SD Gothic Neo", Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
         }
 
-        input {
-            width: 400px;
-            padding: 10px;
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        button {
-            padding: 10px 20px;
-            cursor: pointer;
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #222;
         }
 
         .top-menu {
+            display: flex;
+            justify-content: center;
             margin-bottom: 20px;
+        }
+
+        .top-menu button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #4a90e2;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .top-menu button:hover {
+            background: #357bd8;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 420px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            outline: none;
+        }
+
+        button.search {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: none;
+            background: #111827;
+            color: white;
+            cursor: pointer;
+        }
+
+        button.search:hover {
+            background: #000;
         }
 
         .selected-symptom {
-            background: #eef6ff;
+            background: #e8f1ff;
             border: 1px solid #b9d7ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+            font-weight: bold;
+            color: #1d4ed8;
         }
 
+        h2 {
+            text-align: center;
+            margin: 30px 0 10px;
+        }
+
+        /* CARD */
         .card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 10px;
+            background: white;
+            border-radius: 16px;
+            margin-top: 18px;
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             cursor: pointer;
             transition: 0.2s;
         }
 
         .card:hover {
-            background-color: #f8f8f8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         }
 
         .title {
+            font-size: 20px;
             margin-bottom: 10px;
+            color: #111827;
         }
 
         .summary {
             display: flex;
-            gap: 20px;
+            gap: 18px;
             align-items: flex-start;
         }
 
-        .image-area {
-            flex-shrink: 0;
-        }
-
         .image-area img {
-            width: 160px;
-            border-radius: 8px;
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: #f3f4f6;
+            padding: 8px;
         }
 
         .info-area {
             flex: 1;
         }
 
+        .info-area p {
+            margin: 6px 0;
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #111827;
+        }
+
+        /* DETAIL */
         .detail {
             display: none;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #eee;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .detail p {
+            margin: 10px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: #eef2ff;
+            color: #4338ca;
+            margin-bottom: 8px;
         }
 
         .arrow {
             text-align: center;
-            font-size: 26px;
-            margin-top: 12px;
-            color: #555;
-            user-select: none;
+            font-size: 22px;
+            margin-top: 10px;
+            color: #6b7280;
         }
 
         .empty {
-            margin-top: 30px;
-            color: #777;
+            text-align: center;
+            margin-top: 40px;
+            color: #6b7280;
         }
     </style>
 </head>
 
 <body>
 
-<h1>증상 기반 약물 검색</h1>
+<div class="container">
 
-<div class="top-menu">
-    <button onclick="location.href='/symptom'">
-        ← 증상 검색으로 돌아가기
-    </button>
-</div>
+    <h1>💊 증상 기반 약물 검색</h1>
 
-<form method="POST">
-    <input
-        type="text"
-        name="keyword"
-        placeholder="예: 두통, 감기, 복통"
-        value="{{ keyword }}"
-        required
-    >
-    <button type="submit">검색</button>
-</form>
-
-{% if keyword %}
-<div class="selected-symptom">
-    <strong>선택된 증상:</strong> {{ keyword }}
-</div>
-{% endif %}
-
-{% if drugs %}
-
-<h2>검색 결과 ({{ drugs|length }}건)</h2>
-
-{% for drug in drugs %}
-<div class="card" onclick="toggleDetail(this)">
-
-    <h2 class="title">{{ drug.itemName }}</h2>
-
-    <div class="summary">
-
-        {% if drug.itemImage %}
-        <div class="image-area">
-            <img src="{{ drug.itemImage }}" alt="약 이미지">
-        </div>
-        {% endif %}
-
-        <div class="info-area">
-
-            <p>
-                <strong>제조사:</strong>
-                {{ drug.entpName }}
-            </p>
-
-            <p>
-                <strong>효능:</strong><br>
-                {{ drug.efcyQesitm }}
-            </p>
-
-        </div>
-
+    <div class="top-menu">
+        <button onclick="location.href='/symptom'">
+            ← 증상 검색으로 돌아가기
+        </button>
     </div>
 
-    <div class="detail">
+    <form method="POST">
+        <input
+            type="text"
+            name="keyword"
+            placeholder="예: 두통, 감기, 복통"
+            value="{{ keyword }}"
+            required
+        >
+        <button class="search" type="submit">검색</button>
+    </form>
 
-        {% if drug.useMethodQesitm %}
-        <p>
-            <strong>사용법:</strong><br>
-            {{ drug.useMethodQesitm }}
-        </p>
-        {% endif %}
+    {% if keyword %}
+    <div class="selected-symptom">
+        선택된 증상: {{ keyword }}
+    </div>
+    {% endif %}
 
-        {% if drug.atpnWarnQesitm %}
-        <p>
-            <strong>주의사항 경고:</strong><br>
-            {{ drug.atpnWarnQesitm }}
-        </p>
-        {% endif %}
+    {% if drugs %}
 
-        {% if drug.atpnQesitm %}
-        <p>
-            <strong>주의사항:</strong><br>
-            {{ drug.atpnQesitm }}
-        </p>
-        {% endif %}
+    <h2>검색 결과 ({{ drugs|length }}건)</h2>
 
-        {% if drug.intrcQesitm %}
-        <p>
-            <strong>상호작용:</strong><br>
-            {{ drug.intrcQesitm }}
-        </p>
-        {% endif %}
+    {% for drug in drugs %}
+    <div class="card" onclick="toggleDetail(this)">
 
-        {% if drug.seQesitm %}
-        <p>
-            <strong>부작용:</strong><br>
-            {{ drug.seQesitm }}
-        </p>
-        {% endif %}
+        <div class="badge">일반의약품 정보</div>
 
-        {% if drug.depositMethodQesitm %}
-        <p>
-            <strong>보관방법:</strong><br>
-            {{ drug.depositMethodQesitm }}
-        </p>
-        {% endif %}
+        <div class="title">{{ drug.itemName }}</div>
+
+        <div class="summary">
+
+            {% if drug.itemImage %}
+            <div class="image-area">
+                <img src="{{ drug.itemImage }}" alt="약 이미지">
+            </div>
+            {% endif %}
+
+            <div class="info-area">
+
+                <p><span class="label">제조사:</span> {{ drug.entpName }}</p>
+
+                <p><span class="label">효능:</span></p>
+                <p>{{ drug.efcyQesitm }}</p>
+
+            </div>
+
+        </div>
+
+        <div class="detail">
+
+            {% if drug.useMethodQesitm %}
+            <p><span class="label">사용법</span><br>{{ drug.useMethodQesitm }}</p>
+            {% endif %}
+
+            {% if drug.atpnWarnQesitm %}
+            <p><span class="label">경고</span><br>{{ drug.atpnWarnQesitm }}</p>
+            {% endif %}
+
+            {% if drug.atpnQesitm %}
+            <p><span class="label">주의사항</span><br>{{ drug.atpnQesitm }}</p>
+            {% endif %}
+
+            {% if drug.intrcQesitm %}
+            <p><span class="label">상호작용</span><br>{{ drug.intrcQesitm }}</p>
+            {% endif %}
+
+            {% if drug.seQesitm %}
+            <p><span class="label">부작용</span><br>{{ drug.seQesitm }}</p>
+            {% endif %}
+
+            {% if drug.depositMethodQesitm %}
+            <p><span class="label">보관방법</span><br>{{ drug.depositMethodQesitm }}</p>
+            {% endif %}
+
+        </div>
+
+        <div class="arrow">▼ 클릭해서 상세보기</div>
 
     </div>
+    {% endfor %}
 
-    <div class="arrow">▼</div>
+    {% elif keyword %}
+
+    <div class="empty">
+        <h3>검색 결과가 없습니다</h3>
+        <p>다른 증상으로 다시 검색해보세요</p>
+    </div>
+
+    {% endif %}
 
 </div>
-{% endfor %}
-
-{% elif keyword %}
-
-<div class="empty">
-    <h3>검색 결과가 없습니다.</h3>
-    <p>다른 증상명으로 검색해보세요.</p>
-</div>
-
-{% endif %}
 
 <script>
 function toggleDetail(card) {
-
     const detail = card.querySelector(".detail");
     const arrow = card.querySelector(".arrow");
 
     if (detail.style.display === "block") {
         detail.style.display = "none";
-        arrow.textContent = "▼";
+        arrow.textContent = "▼ 클릭해서 상세보기";
     } else {
         detail.style.display = "block";
-        arrow.textContent = "▲";
+        arrow.textContent = "▲ 접기";
     }
 }
 </script>
