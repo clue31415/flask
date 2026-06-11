@@ -21,6 +21,19 @@
             cursor: pointer;
         }
 
+        .top-menu {
+            margin-bottom: 20px;
+        }
+
+        .selected-symptom {
+            background: #eef6ff;
+            border: 1px solid #b9d7ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
         .card {
             border: 1px solid #ddd;
             padding: 15px;
@@ -64,13 +77,17 @@
             border-top: 1px solid #ddd;
         }
 
-        /* 🔻 삼각형 버튼 */
         .arrow {
             text-align: center;
             font-size: 26px;
             margin-top: 12px;
             color: #555;
             user-select: none;
+        }
+
+        .empty {
+            margin-top: 30px;
+            color: #777;
         }
     </style>
 </head>
@@ -79,15 +96,32 @@
 
 <h1>증상 기반 약물 검색</h1>
 
+<div class="top-menu">
+    <button onclick="location.href='/symptom'">
+        ← 증상 검색으로 돌아가기
+    </button>
+</div>
+
 <form method="POST">
     <input
         type="text"
         name="keyword"
         placeholder="예: 두통, 감기, 복통"
+        value="{{ keyword }}"
         required
     >
     <button type="submit">검색</button>
 </form>
+
+{% if keyword %}
+<div class="selected-symptom">
+    <strong>선택된 증상:</strong> {{ keyword }}
+</div>
+{% endif %}
+
+{% if drugs %}
+
+<h2>검색 결과 ({{ drugs|length }}건)</h2>
 
 {% for drug in drugs %}
 <div class="card" onclick="toggleDetail(this)">
@@ -103,32 +137,80 @@
         {% endif %}
 
         <div class="info-area">
-            <p><strong>제조사:</strong> {{ drug.entpName }}</p>
+
+            <p>
+                <strong>제조사:</strong>
+                {{ drug.entpName }}
+            </p>
 
             <p>
                 <strong>효능:</strong><br>
                 {{ drug.efcyQesitm }}
             </p>
+
         </div>
 
     </div>
 
     <div class="detail">
 
-        <p><strong>사용법:</strong><br>{{ drug.useMethodQesitm }}</p>
-        <p><strong>주의사항 경고:</strong><br>{{ drug.atpnWarnQesitm }}</p>
-        <p><strong>주의사항:</strong><br>{{ drug.atpnQesitm }}</p>
-        <p><strong>상호작용:</strong><br>{{ drug.intrcQesitm }}</p>
-        <p><strong>부작용:</strong><br>{{ drug.seQesitm }}</p>
-        <p><strong>보관방법:</strong><br>{{ drug.depositMethodQesitm }}</p>
+        {% if drug.useMethodQesitm %}
+        <p>
+            <strong>사용법:</strong><br>
+            {{ drug.useMethodQesitm }}
+        </p>
+        {% endif %}
+
+        {% if drug.atpnWarnQesitm %}
+        <p>
+            <strong>주의사항 경고:</strong><br>
+            {{ drug.atpnWarnQesitm }}
+        </p>
+        {% endif %}
+
+        {% if drug.atpnQesitm %}
+        <p>
+            <strong>주의사항:</strong><br>
+            {{ drug.atpnQesitm }}
+        </p>
+        {% endif %}
+
+        {% if drug.intrcQesitm %}
+        <p>
+            <strong>상호작용:</strong><br>
+            {{ drug.intrcQesitm }}
+        </p>
+        {% endif %}
+
+        {% if drug.seQesitm %}
+        <p>
+            <strong>부작용:</strong><br>
+            {{ drug.seQesitm }}
+        </p>
+        {% endif %}
+
+        {% if drug.depositMethodQesitm %}
+        <p>
+            <strong>보관방법:</strong><br>
+            {{ drug.depositMethodQesitm }}
+        </p>
+        {% endif %}
 
     </div>
 
-    <!-- 🔻 하단 중앙 삼각형 -->
     <div class="arrow">▼</div>
 
 </div>
 {% endfor %}
+
+{% elif keyword %}
+
+<div class="empty">
+    <h3>검색 결과가 없습니다.</h3>
+    <p>다른 증상명으로 검색해보세요.</p>
+</div>
+
+{% endif %}
 
 <script>
 function toggleDetail(card) {
