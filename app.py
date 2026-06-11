@@ -35,6 +35,7 @@ def index():
 
     drugs = []
     keyword = ""
+    totalCount = 0
 
     # symptom 페이지에서 넘어온 경우
     if request.method == "GET":
