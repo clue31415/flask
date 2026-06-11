@@ -211,7 +211,7 @@
 
     {% if drugs %}
 
-    <h2>검색 결과 ({{ drugs|length }}건)</h2>
+    <h2>검색 결과 ({{ totalCount }}건)</h2>
 
     {% for drug in drugs %}
     <div class="card" onclick="toggleDetail(this)">
