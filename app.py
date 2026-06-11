@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-SERVICE_KEY = SERVICEKEY_ENV
+SERVICE_KEY =${SERVICEKEY_ENV}
 
 API_URL = "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"
 
