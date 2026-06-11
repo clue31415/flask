@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request
 import requests
+import os
 
 app = Flask(__name__)
 
-SERVICE_KEY =${SERVICEKEY_ENV}
+SERVICE_KEY = os.getenv("SERVICEKEY_ENV")
 
 API_URL = "http://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList"
 
